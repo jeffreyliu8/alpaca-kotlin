@@ -61,7 +61,7 @@ mavenPublishing {
     pom {
         name = "My library"
         description = "A library."
-        inceptionYear = "2024"
+        inceptionYear = "2025"
         url = "https://github.com/kotlin/multiplatform-library-template/"
         licenses {
             license {
