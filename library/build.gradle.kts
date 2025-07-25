@@ -44,7 +44,6 @@ kotlin {
     iosX64()
     iosArm64()
     iosSimulatorArm64()
-    linuxX64()
 
     sourceSets {
         val commonMain by getting {
@@ -83,7 +82,7 @@ mavenPublishing {
         name = "My library"
         description = "Kotlin for Alpaca trader api"
         inceptionYear = "2025"
-        url = "https://github.com/kotlin/multiplatform-library-template/"
+        url = "https://github.com/jeffreyliu8/alpaca-kotlin/"
         licenses {
             license {
                 name = "The Apache License, Version 2.0"
