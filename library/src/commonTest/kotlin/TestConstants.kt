@@ -1,4 +1,4 @@
 package io.github.jeffreyliu8
 
-const val apiKey = "change to your paper trading api key"
-const val apiSecret = "change to your paper trading api secret"
+const val apiKey = "PKBM2LWRYRQUJEE748HQ"
+const val apiSecret = "0Ux9q4ePQrkBQsSkdCuqfctxPyfSX34FqPVyQB2V"
