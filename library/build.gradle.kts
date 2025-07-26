@@ -11,7 +11,7 @@ plugins {
 }
 
 group = "io.github.jeffreyliu8"
-version = "0.0.2"
+version = "0.0.4"
 
 kotlin {
     jvm("desktop")
@@ -98,10 +98,10 @@ mavenPublishing {
 
     signAllPublications()
 
-    coordinates(group.toString(), "alpaca-kotlin", "0.0.2")
+    coordinates(group.toString(), "alpaca-kotlin", version.toString())
 
     pom {
-        name = "My library"
+        name = "Alpaca Kotlin"
         description = "Kotlin for Alpaca trader api"
         inceptionYear = "2025"
         url = "https://github.com/jeffreyliu8/alpaca-kotlin/"
@@ -120,9 +120,9 @@ mavenPublishing {
             }
         }
         scm {
-            url = "XXX"
-            connection = "YYY"
-            developerConnection = "ZZZ"
+            url = "https://github.com/jeffreyliu8/alpaca-kotlin"
+            connection = "scm:git:git://github.com/jeffreyliu8/alpaca-kotlin.git"
+            developerConnection = "scm:git:ssh://git@github.com:jeffreyliu8/alpaca-kotlin.git"
         }
     }
 }
