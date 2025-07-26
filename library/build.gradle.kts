@@ -98,7 +98,7 @@ mavenPublishing {
 
     signAllPublications()
 
-    coordinates(group.toString(), "alpaca-kotlin", version.toString())
+    coordinates(group.toString(), "alpaca-kotlin", "0.0.2")
 
     pom {
         name = "My library"
