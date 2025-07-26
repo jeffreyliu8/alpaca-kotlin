@@ -72,12 +72,6 @@ You can stream account updates and stock prices using Kotlin Flows.
 #### Stream Account Updates
 
 ```kotlin
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
-
-// ... client setup ...
-
 runBlocking {
     launch {
         client.streamAccount().collect { accountUpdate ->
@@ -90,17 +84,25 @@ runBlocking {
 #### Monitor Stock Prices
 
 ```kotlin
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
-
-// ... client setup ...
-
 runBlocking {
     launch {
         client.monitorStockPrice(setOf("AAPL", "GOOG")).collect { stockPriceUpdate ->
             println("Received stock price update: $stockPriceUpdate")
         }
+    }
+}
+```
+
+### Test Mode
+You can use the test mode to get a fake stock price for testing purposes.
+
+```kotlin
+runBlocking {
+    client.monitorStockPrice(
+        setOf("FAKEPACA"),
+        stockExchange = AlpacaStockExchangeOption.TEST
+    ).collect {
+        println(it)
     }
 }
 ```
