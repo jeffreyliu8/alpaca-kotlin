@@ -194,7 +194,7 @@ If you have an Android target in your project, you should follow the [steps to p
 // build.gradle.kts
 
 android {
-     namespace = "io.github.kotlinhandson.fibonacci"
+    namespace = "io.github.jeffreyliu8.alpacakotlin"
 }
 ```
 

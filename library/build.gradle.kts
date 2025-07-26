@@ -60,7 +60,7 @@ kotlin {
 }
 
 android {
-    namespace = "io.github.jeffreyliu8.fibonacci"
+    namespace = "io.github.jeffreyliu8.alpacakotlin"
     compileSdk = libs.versions.android.compileSdk.get().toInt()
     defaultConfig {
         minSdk = libs.versions.android.minSdk.get().toInt()
