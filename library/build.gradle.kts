@@ -6,6 +6,7 @@ import org.jetbrains.kotlin.gradle.targets.js.webpack.KotlinWebpackConfig
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
     alias(libs.plugins.androidLibrary)
+    alias(libs.plugins.kotlinxSerialization)
     alias(libs.plugins.vanniktech.mavenPublish)
 }
 
@@ -46,15 +47,37 @@ kotlin {
     iosSimulatorArm64()
 
     sourceSets {
+        val desktopMain by getting
         val commonMain by getting {
             dependencies {
-                //put your multiplatform dependencies here
+                api(libs.ktor.client.core)
+                api(libs.ktor.client.content.negotiation)
+                api(libs.ktor.client.logging)
+                implementation(libs.ktor.client.websockets)
+                api(libs.ktor.serialization.kotlinx.json)
+                implementation(libs.kotlinx.serialization.json)
+
+                api(libs.kermit)
             }
         }
         val commonTest by getting {
             dependencies {
                 implementation(libs.kotlin.test)
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
             }
+        }
+
+        androidMain {
+            dependencies {
+                implementation(libs.ktor.client.okhttp)
+            }
+        }
+        desktopMain.dependencies {
+            implementation(libs.kotlinx.coroutinesSwing)
+            implementation(libs.ktor.client.cio)
+        }
+        nativeMain.dependencies {
+            implementation(libs.ktor.client.darwin)
         }
     }
 }
