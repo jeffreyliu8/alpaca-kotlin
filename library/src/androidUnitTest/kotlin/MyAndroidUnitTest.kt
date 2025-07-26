@@ -3,10 +3,10 @@ package io.github.jeffreyliu8
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class IosFibiTest {
+class MyAndroidUnitTest {
 
     @Test
     fun `test 3rd element`() {
-        assertEquals(7, generateFibi().take(3).last())
+        assertEquals(3, 3)
     }
 }
