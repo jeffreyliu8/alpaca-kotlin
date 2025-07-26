@@ -11,7 +11,7 @@ plugins {
 }
 
 group = "io.github.jeffreyliu8"
-version = "0.0.4"
+version = "0.0.5"
 
 kotlin {
     jvm("desktop")
@@ -50,20 +50,20 @@ kotlin {
         val desktopMain by getting
         commonMain {
             dependencies {
-                api(libs.ktor.client.core)
-                api(libs.ktor.client.content.negotiation)
-                api(libs.ktor.client.logging)
+                implementation(libs.ktor.client.core)
+                implementation(libs.ktor.client.content.negotiation)
+                implementation(libs.ktor.client.logging)
                 implementation(libs.ktor.client.websockets)
-                api(libs.ktor.serialization.kotlinx.json)
+                implementation(libs.ktor.serialization.kotlinx.json)
                 implementation(libs.kotlinx.serialization.json)
 
-                api(libs.kermit)
+                implementation(libs.kermit)
             }
         }
         commonTest {
             dependencies {
                 implementation(libs.kotlin.test)
-                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
+                implementation(libs.kotlinx.coroutines.test)
             }
         }
         androidMain {

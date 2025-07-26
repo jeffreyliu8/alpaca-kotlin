@@ -18,7 +18,7 @@ Add the following to your `build.gradle.kts` file:
 
 ```kotlin
 dependencies {
-    implementation("io.github.jeffreyliu8:alpaca-kotlin:0.0.2")
+    implementation("io.github.jeffreyliu8:alpaca-kotlin:0.0.4")
 }
 ```
 
@@ -63,6 +63,46 @@ val order = client.placeOrder(
     )
 )
 println(order)
+```
+
+### Streaming Data
+
+You can stream account updates and stock prices using Kotlin Flows.
+
+#### Stream Account Updates
+
+```kotlin
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+
+// ... client setup ...
+
+runBlocking {
+    launch {
+        client.streamAccount().collect { accountUpdate ->
+            println("Received account update: $accountUpdate")
+        }
+    }
+}
+```
+
+#### Monitor Stock Prices
+
+```kotlin
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+
+// ... client setup ...
+
+runBlocking {
+    launch {
+        client.monitorStockPrice(setOf("AAPL", "GOOG")).collect { stockPriceUpdate ->
+            println("Received stock price update: $stockPriceUpdate")
+        }
+    }
+}
 ```
 
 ## License
