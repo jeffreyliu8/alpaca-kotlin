@@ -97,4 +97,19 @@ class MyCommonUnitTest {
         }.first()
         assertNotNull(pair.first.toString())
     }
+
+    @Test
+    fun monitorFakepacaStockPriceExample() = runTest {
+        val client: AlpacaClient = AlpacaClientImpl(
+            isPaper = true,
+            apiKey = apiKey,
+            apiSecret = apiSecret,
+        )
+        val response = client.monitorStockPrice(
+            setOf("FAKEPACA"),
+            stockExchange = AlpacaStockExchangeOption.TEST
+        ).first()
+        println("fakepeca response: $response")
+        assertNotNull(response)
+    }
 }
