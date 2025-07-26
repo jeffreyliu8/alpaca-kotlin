@@ -1,5 +1,7 @@
 package alpaca
 
+import alpaca.helper.defaultAlpacaHttpClient
+import alpaca.helper.defaultAlpacaLogger
 import alpaca.logger.LoggerRepository
 import alpaca.model.AlpacaAccount
 import alpaca.model.AlpacaErrorCodeMessageResponse
@@ -35,8 +37,8 @@ class AlpacaClientImpl(
     isPaper: Boolean = true,
     private val apiKey: String,
     private val apiSecret: String,
-    private val httpClient: HttpClient,
-    private val logger: LoggerRepository,
+    private val httpClient: HttpClient = defaultAlpacaHttpClient,
+    private val logger: LoggerRepository = defaultAlpacaLogger,
 ) : AlpacaClient {
 
     companion object {

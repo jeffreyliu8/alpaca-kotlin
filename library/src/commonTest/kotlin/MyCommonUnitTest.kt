@@ -3,21 +3,38 @@ package io.github.jeffreyliu8
 import alpaca.AlpacaClient
 import alpaca.AlpacaClientImpl
 import alpaca.logger.LoggerRepositoryImpl
+import alpaca.model.AlpacaResponseInterface
+import alpaca.model.AlpacaStockExchangeOption
+import alpaca.model.stream.StreamingRequestResponse
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.logging.LogLevel
 import io.ktor.client.plugins.logging.Logging
 import io.ktor.client.plugins.websocket.WebSockets
 import io.ktor.serialization.kotlinx.json.json
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.json.Json
 import kotlin.test.Test
 import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
 
 class MyCommonUnitTest {
+    @Test
+    fun basicExample() = runTest {
+        val client: AlpacaClient = AlpacaClientImpl(
+            isPaper = true,
+            apiKey = apiKey,
+            apiSecret = apiSecret,
+        )
+
+        val account = client.getAccount()
+        assertEquals("1f8d7713-771d-4679-a756-e324276762bc", account?.id)
+    }
 
     @Test
-    fun example() = runTest {
+    fun customerClientLoggerExample() = runTest {
         val httpClient = HttpClient {
             install(ContentNegotiation) {
                 json(Json {
@@ -68,16 +85,16 @@ class MyCommonUnitTest {
 //
 //        }
 
-//        combine(
-//            client.streamAccount(),
-//            client.monitorStockPrice(
-//                setOf("FAKEPACA"),
-//                stockExchange = AlpacaStockExchangeOption.TEST
-//            )
-//        ) { a, b ->
-//            println("$b")
-//        }.collect {
-//
-//        }
+        val pair: Pair<StreamingRequestResponse, List<AlpacaResponseInterface>> = combine(
+            client.streamAccount(),
+            client.monitorStockPrice(
+                setOf("FAKEPACA"),
+                stockExchange = AlpacaStockExchangeOption.TEST
+            )
+        ) { a, b ->
+            println("$a, $b")
+            Pair(a, b)
+        }.first()
+        assertNotNull(pair.first.toString())
     }
 }
