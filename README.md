@@ -18,7 +18,7 @@ Add the following to your `build.gradle.kts` file:
 
 ```kotlin
 dependencies {
-    implementation("io.github.jeffreyliu8:alpaca-kotlin:0.0.4")
+    implementation("io.github.jeffreyliu8:alpaca-kotlin:0.0.5")
 }
 ```
 
