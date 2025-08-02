@@ -147,11 +147,11 @@ data class BarSchema(
     // "t": RFC-3339 formatted timestamp with nanosecond precision.
     @SerialName("t") val timestamp: String,
 
-    // todo: not sure what this is
-    @SerialName("n") val notSure: Int? = null,
+    // number of trades
+    @SerialName("n") val numberOfTrades: Int? = null,
 
-    // todo: not sure what this is
-    @SerialName("vw") val vw: Double? = null,
+    // volume-weighted average price
+    @SerialName("vw") val volumeWeightedAveragePrice: Double? = null,
 ) : AlpacaResponseInterface
 
 @Serializable

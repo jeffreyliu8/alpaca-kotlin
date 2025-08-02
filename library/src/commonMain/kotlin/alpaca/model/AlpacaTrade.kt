@@ -2,8 +2,6 @@ package alpaca.model
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import kotlin.time.ExperimentalTime
-import kotlin.time.Instant
 
 @Serializable
 data class AlpacaTrade(
@@ -15,9 +13,3 @@ data class AlpacaTrade(
     @SerialName("i") val id: Long, //Trade ID.
     @SerialName("z") val tape: String //Tape.
 )
-
-
-@OptIn(ExperimentalTime::class)
-fun String.timestampInstantStringToMilliLong(): Long {
-    return Instant.parse(this).toEpochMilliseconds()
-}
