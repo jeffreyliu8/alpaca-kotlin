@@ -3,6 +3,7 @@ package alpaca
 import kotlinx.coroutines.flow.Flow
 import alpaca.model.AlpacaAccount
 import alpaca.model.AlpacaClockResponse
+import alpaca.model.AlpacaNewsResponse
 import alpaca.model.AlpacaOrder
 import alpaca.model.AlpacaOrderIdStatus
 import alpaca.model.AlpacaOrderRequest
@@ -166,6 +167,24 @@ interface AlpacaClient {
         pageToken: String? = null //Pagination token to continue from.
     ): AlpacaTrades?
 
+
+    /**
+     * Returns the latest news articles across stocks and crypto. By default, returns the latest 10 news articles.
+     *
+     * https://docs.alpaca.markets/reference/news-3
+     *
+     * @param sortDesc Sort articles by updated date, default true
+     * @param symbols A comma-separated list of symbols for which to query news.
+     * @param limit Limit of news items to be returned for a result page.
+     * @param pageToken The pagination token from which to continue. The value to pass here is returned in specific requests when more data is available, usually because of a response result limit.
+     */
+    suspend fun getNews(
+        sortDesc: Boolean = true,
+        symbols: String,
+        limit: Int = 10,
+        pageToken: String? = null,
+    ): AlpacaNewsResponse?
+
     /**
      * The clock API serves the current market timestamp, whether or not the market is currently
      * open, as well as the times of the next market open and close.
@@ -175,4 +194,11 @@ interface AlpacaClient {
      * @return Returns the market clock, null if error
      */
     suspend fun getClock(): AlpacaClockResponse?
+
+    /**
+     * This API provides stock market news on a websocket stream.
+     *
+     * https://docs.alpaca.markets/docs/streaming-real-time-news
+     */
+    fun streamNews(symbols: Set<String> = setOf("*")): Flow<List<AlpacaResponseInterface>>
 }

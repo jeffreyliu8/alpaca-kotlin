@@ -6,6 +6,7 @@ import alpaca.logger.LoggerRepository
 import alpaca.model.AlpacaAccount
 import alpaca.model.AlpacaClockResponse
 import alpaca.model.AlpacaErrorCodeMessageResponse
+import alpaca.model.AlpacaNewsResponse
 import alpaca.model.AlpacaOrder
 import alpaca.model.AlpacaOrderIdStatus
 import alpaca.model.AlpacaOrderRequest
@@ -18,9 +19,11 @@ import alpaca.model.AlpacaSubscriptionRequest
 import alpaca.model.AlpacaSuccessMessageResponse
 import alpaca.model.AlpacaTrades
 import alpaca.model.BarSchema
+import alpaca.model.NewsEvent
 import alpaca.model.QuoteSchema
 import alpaca.model.TradeSchema
 import alpaca.model.TradeUpdateSchema
+import alpaca.model.stream.AlpacaNewsSubscriptionMessage
 import alpaca.model.stream.StreamingRequestResponse
 import io.ktor.client.*
 import io.ktor.client.call.*
@@ -32,6 +35,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.serialization.json.Json
 import kotlin.collections.forEach
+import kotlin.coroutines.cancellation.CancellationException
 import kotlin.time.ExperimentalTime
 
 class AlpacaClientImpl(
@@ -43,18 +47,19 @@ class AlpacaClientImpl(
 ) : AlpacaClient {
 
     companion object {
-        const val PAPER_API_URL = "https://paper-api.alpaca.markets"
-        const val LIVE_API_URL = "https://api.alpaca.markets"
 
         const val PAPER_STREAM_URL = "paper-api.alpaca.markets"
         const val LIVE_STREAM_URL = "api.alpaca.markets"
 
         const val API_DATA_URL = "https://data.alpaca.markets"
+
+        const val STREAM_DATA = "stream.data.alpaca.markets"
     }
 
-    private val apiDomain = if (isPaper) PAPER_API_URL else LIVE_API_URL
-    private val streamDomain = if (isPaper) PAPER_STREAM_URL else LIVE_STREAM_URL
-    private val apiDataDomain = API_DATA_URL
+
+    private val domainUrl = if (isPaper) PAPER_STREAM_URL else LIVE_STREAM_URL
+    private val apiDomain = "https://$domainUrl"
+
 
     private fun HttpRequestBuilder.withAlpacaHeaders() {
         headers {
@@ -220,7 +225,7 @@ class AlpacaClientImpl(
         try {
             httpClient.webSocket(
                 method = HttpMethod.Get,
-                host = "stream.data.alpaca.markets",
+                host = STREAM_DATA,
                 path = "/v2/${stockExchange.name.lowercase()}",
                 request = {
                     url {
@@ -257,44 +262,42 @@ class AlpacaClientImpl(
                             apiResponse.forEach { response ->
                                 when (response) {
                                     is AlpacaErrorCodeMessageResponse -> {
-//                                            logger.e("Error response: $response")
                                         emit(apiResponse)
                                         return@forEach
                                     }
 
                                     is AlpacaSuccessMessageResponse -> {
-//                                            logger.d("success response: ${response.msg}")
                                         emit(apiResponse)
                                         return@forEach
                                     }
 
                                     is AlpacaSubscriptionRequest -> {
-//                                            logger.d("Subscription request: $response")
                                         emit(apiResponse)
                                         return@forEach
                                     }
 
                                     is TradeSchema -> {
-//                                            logger.d("TradeSchema response: $response")
                                         emit(apiResponse)
                                         return@forEach
                                     }
 
                                     is QuoteSchema -> {
-//                                            logger.d("QuoteSchema response: $response")
                                         emit(apiResponse)
                                         return@forEach
                                     }
 
                                     is BarSchema -> {
-//                                            logger.d("BarSchema response: $response")
                                         emit(apiResponse)
                                         return@forEach
                                     }
 
                                     is TradeUpdateSchema -> {
-//                                            logger.d("TradeUpdateSchema response: $response")
                                         emit(apiResponse)
+                                        return@forEach
+                                    }
+
+                                    else -> {
+                                        logger.e("Unknown response type: $response")
                                         return@forEach
                                     }
                                 }
@@ -306,8 +309,11 @@ class AlpacaClientImpl(
                 }
             }
         } catch (e: Exception) {
-            logger.e("Error in WebSocket connection: ${e.message}")
-            throw e
+            if (e is CancellationException) {
+                // Re-throw the cancellation exception to propagate it correctly
+                throw e
+            }
+            logger.e("Error in WebSocket connection: $e, ${e.message}")
         }
     }
 
@@ -315,7 +321,7 @@ class AlpacaClientImpl(
         try {
             httpClient.webSocket(
                 method = HttpMethod.Get,
-                host = streamDomain,
+                host = domainUrl,
                 path = "/stream",
                 request = {
                     url {
@@ -362,8 +368,11 @@ class AlpacaClientImpl(
                 }
             }
         } catch (e: Exception) {
-            logger.e("Error in WebSocket connection: ${e.message}")
-            throw e
+            if (e is CancellationException) {
+                // Re-throw the cancellation exception to propagate it correctly
+                throw e
+            }
+            logger.e("Error in WebSocket connection: $e, ${e.message}")
         }
     }
 
@@ -374,7 +383,7 @@ class AlpacaClientImpl(
         limit: Int,
         pageToken: String?
     ): AlpacaTrades? {
-        val rsp = httpClient.get("$apiDataDomain/v2/stocks/$symbol/trades") {
+        val rsp = httpClient.get("$API_DATA_URL/v2/stocks/$symbol/trades") {
             withAlpacaHeaders()
             parameter("start", start)
             parameter("end", end)
@@ -387,6 +396,25 @@ class AlpacaClientImpl(
         return null
     }
 
+    override suspend fun getNews(
+        sortDesc: Boolean,
+        symbols: String,
+        limit: Int,
+        pageToken: String?
+    ): AlpacaNewsResponse? {
+        val rsp = httpClient.get("$API_DATA_URL/v1beta1/news") {
+            withAlpacaHeaders()
+            parameter("sort", if (sortDesc) "desc" else "asc")
+            parameter("symbols", symbols)
+            parameter("limit", limit)
+            parameter("page_token", pageToken)
+        }
+        if (rsp.status == HttpStatusCode.OK) {
+            return rsp.body<AlpacaNewsResponse>()
+        }
+        return null
+    }
+
     override suspend fun getClock(): AlpacaClockResponse? {
         val rsp = httpClient.get("$apiDomain/v2/clock") {
             withAlpacaHeaders()
@@ -395,5 +423,84 @@ class AlpacaClientImpl(
             return rsp.body<AlpacaClockResponse>()
         }
         return null
+    }
+
+    override fun streamNews(symbols: Set<String>): Flow<List<AlpacaResponseInterface>> = flow {
+        try {
+            httpClient.webSocket(
+                method = HttpMethod.Get,
+                host = STREAM_DATA,
+                path = "/v1beta1/news",
+                request = {
+                    url {
+                        protocol = URLProtocol.WSS
+                    }
+                    withAlpacaHeaders()
+                }
+            ) {
+
+                val subscriptionRequest = AlpacaNewsSubscriptionMessage(
+                    action = "subscribe",
+                    news = symbols.toList(),
+                )
+
+                val myText = Json.encodeToString(
+                    AlpacaNewsSubscriptionMessage.serializer(),
+                    subscriptionRequest
+                )
+                send(Frame.Text(myText))
+
+                // Receive messages
+                for (frame in incoming) {
+                    when (frame) {
+                        is Frame.Text -> {
+                            val text = frame.readText()
+//                            logger.d("Received WebSocket frame: $text")
+
+                            // Parse the message
+                            val apiResponse =
+                                Json.decodeFromString<List<AlpacaResponseInterface>>(text)
+
+                            apiResponse.forEach { response ->
+                                when (response) {
+                                    is AlpacaErrorCodeMessageResponse -> {
+                                        emit(apiResponse)
+                                        return@forEach
+                                    }
+
+                                    is AlpacaSuccessMessageResponse -> {
+                                        emit(apiResponse)
+                                        return@forEach
+                                    }
+
+                                    is AlpacaSubscriptionRequest -> {
+                                        emit(apiResponse)
+                                        return@forEach
+                                    }
+
+                                    is NewsEvent -> {
+                                        emit(apiResponse)
+                                        return@forEach
+                                    }
+
+                                    else -> {
+                                        logger.e("Unknown response type: $response")
+                                        return@forEach
+                                    }
+                                }
+                            }
+                        }
+
+                        else -> logger.e("Received non-text frame: $frame")
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            if (e is CancellationException) {
+                // Re-throw the cancellation exception to propagate it correctly
+                throw e
+            }
+            logger.e("Error in WebSocket connection: $e, ${e.message}")
+        }
     }
 }

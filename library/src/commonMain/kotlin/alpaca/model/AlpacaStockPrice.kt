@@ -31,11 +31,12 @@ data class AlpacaErrorCodeMessageResponse(
 data class AlpacaSubscriptionRequest(
     @SerialName("T")
     val type: String,
-    val trades: List<String>,
-    val quotes: List<String>,
-    val bars: List<String>,
+    val trades: List<String>? = null,
+    val quotes: List<String>? = null,
+    val bars: List<String>? = null,
     val corrections: List<String>? = null,
     val cancelErrors: List<String>? = null,
+    val news: List<String>? = null,
 ) : AlpacaResponseInterface
 
 @Serializable
@@ -161,6 +162,22 @@ data class TradeUpdateSchema(
     val order: AlpacaOrder? = null,
 ) : AlpacaResponseInterface
 
+//https://docs.alpaca.markets/docs/streaming-real-time-news
+@Serializable
+data class NewsEvent(
+    @SerialName("T") val type: String, //Type of message (“n” for news)
+    val id: Long, //News article ID
+    val headline: String,
+    val summary: String,
+    val author: String,
+    @SerialName("created_at") val createdAt: String,
+    @SerialName("updated_at") val updatedAt: String,
+    val url: String,
+    val content: String,
+    val symbols: List<String>,
+    val source: String
+): AlpacaResponseInterface
+
 
 object ItemSerializer : JsonContentPolymorphicSerializer<AlpacaResponseInterface>(AlpacaResponseInterface::class) {
     override fun selectDeserializer(element: JsonElement): DeserializationStrategy<AlpacaResponseInterface> {
@@ -173,6 +190,7 @@ object ItemSerializer : JsonContentPolymorphicSerializer<AlpacaResponseInterface
                 else if (element.containsKey("T") && (element["T"] as JsonPrimitive).content == "q") QuoteSchema.serializer()
                 else if (element.containsKey("T") && (element["T"] as JsonPrimitive).content == "b") BarSchema.serializer()
                 else if (element.containsKey("T") && (element["T"] as JsonPrimitive).content == "trade_updates") TradeUpdateSchema.serializer()
+                else if (element.containsKey("T") && (element["T"] as JsonPrimitive).content == "n") NewsEvent.serializer()
                 else throw IllegalArgumentException("Unknown object type: $element")
             }
 
