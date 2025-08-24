@@ -30,17 +30,16 @@ import alpaca.AlpacaClientImpl
 
 // For paper trading
 val client: AlpacaClient = AlpacaClientImpl(
-    usePolygon = false, // Or true if you have a Polygon subscription
-    key = "YOUR_PAPER_API_KEY",
-    secret = "YOUR_PAPER_API_SECRET"
+    isPaper = false,
+    apiKey = apiKey,
+    apiSecret = apiSecret,
 )
 
 // For live trading
-val liveClient: AlpacaClient = AlpacaClientImpl(
-    usePolygon = false, // Or true if you have a Polygon subscription
-    key = "YOUR_LIVE_API_KEY",
-    secret = "YOUR_LIVE_API_SECRET",
-    usePaper = false
+val liveClient = AlpacaClientImpl(
+    isPaper = true,
+    apiKey = apiKey,
+    apiSecret = apiSecret,
 )
 
 
