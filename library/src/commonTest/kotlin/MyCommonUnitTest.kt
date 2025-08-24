@@ -14,6 +14,8 @@ import io.ktor.client.plugins.websocket.WebSockets
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.last
+import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.json.Json
 import kotlin.test.Test
@@ -108,8 +110,8 @@ class MyCommonUnitTest {
         val response = client.monitorStockPrice(
             setOf("FAKEPACA"),
             stockExchange = AlpacaStockExchangeOption.TEST
-        ).first()
-        println("fakepeca response: $response")
+        ).take(4).last()
+        println("fakepeca response: ${response.last()}")
         assertNotNull(response)
     }
 
@@ -122,6 +124,31 @@ class MyCommonUnitTest {
         )
         val response = client.getClock()
         println("clock response: $response")
+        assertNotNull(response)
+    }
+
+    @Test
+    fun getNewsTest() = runTest {
+        val client: AlpacaClient = AlpacaClientImpl(
+            isPaper = true,
+            apiKey = apiKey,
+            apiSecret = apiSecret,
+        )
+        val response = client.getNews(symbols = setOf("AAPL", "TSLA"), limit = 2)
+        println("subscribeNewsTest response: $response")
+        assertNotNull(response)
+    }
+
+    @Test
+    fun subscribeNewsTest() = runTest {
+        val client: AlpacaClient = AlpacaClientImpl(
+            isPaper = true,
+            apiKey = apiKey,
+            apiSecret = apiSecret,
+        )
+        val response = client.streamNews().take(3)
+        println("subscribeNewsTest response: ${response.first()}")
+        println("subscribeNewsTest response: ${response.last()}")
         assertNotNull(response)
     }
 }
