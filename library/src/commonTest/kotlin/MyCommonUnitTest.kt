@@ -134,7 +134,7 @@ class MyCommonUnitTest {
             apiKey = apiKey,
             apiSecret = apiSecret,
         )
-        val response = client.getNews(symbols = "AAPL,TSLA")
+        val response = client.getNews(symbols = setOf("AAPL", "TSLA"), limit = 2)
         println("subscribeNewsTest response: $response")
         assertNotNull(response)
     }

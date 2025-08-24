@@ -175,12 +175,12 @@ interface AlpacaClient {
      *
      * @param sortDesc Sort articles by updated date, default true
      * @param symbols A comma-separated list of symbols for which to query news.
-     * @param limit Limit of news items to be returned for a result page.
+     * @param limit Limit of news items to be returned for a result page. 1 to 50.
      * @param pageToken The pagination token from which to continue. The value to pass here is returned in specific requests when more data is available, usually because of a response result limit.
      */
     suspend fun getNews(
         sortDesc: Boolean = true,
-        symbols: String,
+        symbols: Set<String> = setOf("TSLA"),
         limit: Int = 10,
         pageToken: String? = null,
     ): AlpacaNewsResponse?

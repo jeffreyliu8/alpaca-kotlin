@@ -398,14 +398,14 @@ class AlpacaClientImpl(
 
     override suspend fun getNews(
         sortDesc: Boolean,
-        symbols: String,
+        symbols: Set<String>,
         limit: Int,
         pageToken: String?
     ): AlpacaNewsResponse? {
         val rsp = httpClient.get("$API_DATA_URL/v1beta1/news") {
             withAlpacaHeaders()
             parameter("sort", if (sortDesc) "desc" else "asc")
-            parameter("symbols", symbols)
+            parameter("symbols", symbols.joinToString(","))
             parameter("limit", limit)
             parameter("page_token", pageToken)
         }

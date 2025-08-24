@@ -8,7 +8,7 @@ data class AlpacaNewsResponse(
     val news: List<AlpacaNewsArticle>,
 
     @SerialName("next_page_token")
-    val nextPageToken: String
+    val nextPageToken: String? = null,
 )
 
 @Serializable
