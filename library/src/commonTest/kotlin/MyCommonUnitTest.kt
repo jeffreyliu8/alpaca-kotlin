@@ -112,4 +112,16 @@ class MyCommonUnitTest {
         println("fakepeca response: $response")
         assertNotNull(response)
     }
+
+    @Test
+    fun clockTestExample() = runTest {
+        val client: AlpacaClient = AlpacaClientImpl(
+            isPaper = true,
+            apiKey = apiKey,
+            apiSecret = apiSecret,
+        )
+        val response = client.getClock()
+        println("clock response: $response")
+        assertNotNull(response)
+    }
 }

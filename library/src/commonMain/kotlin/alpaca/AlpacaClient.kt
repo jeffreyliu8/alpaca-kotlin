@@ -2,6 +2,7 @@ package alpaca
 
 import kotlinx.coroutines.flow.Flow
 import alpaca.model.AlpacaAccount
+import alpaca.model.AlpacaClockResponse
 import alpaca.model.AlpacaOrder
 import alpaca.model.AlpacaOrderIdStatus
 import alpaca.model.AlpacaOrderRequest
@@ -164,4 +165,14 @@ interface AlpacaClient {
         limit: Int = 10000, //Number of data points to return. Must be in range 1-10000, defaults to 1000
         pageToken: String? = null //Pagination token to continue from.
     ): AlpacaTrades?
+
+    /**
+     * The clock API serves the current market timestamp, whether or not the market is currently
+     * open, as well as the times of the next market open and close.
+     *
+     * https://docs.alpaca.markets/reference/getclock-1
+     *
+     * @return Returns the market clock, null if error
+     */
+    suspend fun getClock(): AlpacaClockResponse?
 }

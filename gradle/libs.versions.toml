@@ -1,12 +1,12 @@
 [versions]
-agp = "8.11.1"
-kotlin = "2.2.0"
+agp = "8.12.1"
+kotlin = "2.2.10"
 kotlinxCoroutineTest = "1.10.2"
 android-minSdk = "24"
 android-compileSdk = "36"
 kotlinx-coroutines = "1.10.2"
-ktor = "3.2.2"
-kermit = "2.0.6"
+ktor = "3.2.3"
+kermit = "2.0.8"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }

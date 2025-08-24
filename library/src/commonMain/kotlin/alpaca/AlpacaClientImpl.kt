@@ -4,6 +4,7 @@ import alpaca.helper.defaultAlpacaHttpClient
 import alpaca.helper.defaultAlpacaLogger
 import alpaca.logger.LoggerRepository
 import alpaca.model.AlpacaAccount
+import alpaca.model.AlpacaClockResponse
 import alpaca.model.AlpacaErrorCodeMessageResponse
 import alpaca.model.AlpacaOrder
 import alpaca.model.AlpacaOrderIdStatus
@@ -382,6 +383,16 @@ class AlpacaClientImpl(
         }
         if (rsp.status == HttpStatusCode.OK) {
             return rsp.body<AlpacaTrades>()
+        }
+        return null
+    }
+
+    override suspend fun getClock(): AlpacaClockResponse? {
+        val rsp = httpClient.get("$apiDomain/v2/clock") {
+            withAlpacaHeaders()
+        }
+        if (rsp.status == HttpStatusCode.OK) {
+            return rsp.body<AlpacaClockResponse>()
         }
         return null
     }
