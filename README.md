@@ -24,6 +24,9 @@ dependencies {
 
 ## Usage
 
+Please check out the test file here
+https://github.com/jeffreyliu8/alpaca-kotlin/blob/main/library/src/commonTest/kotlin/MyCommonUnitTest.kt
+
 ```kotlin
 import alpaca.AlpacaClient
 import alpaca.AlpacaClientImpl
