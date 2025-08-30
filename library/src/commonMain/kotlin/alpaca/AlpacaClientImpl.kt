@@ -402,6 +402,8 @@ class AlpacaClientImpl(
         limit: Int,
         pageToken: String?
     ): AlpacaNewsResponse? {
+        if (symbols.isEmpty()) throw RuntimeException("symbols cannot be empty")
+        if (limit > 50 || limit < 1) throw RuntimeException("limit must be between 1 and 50, inclusive")
         val rsp = httpClient.get("$API_DATA_URL/v1beta1/news") {
             withAlpacaHeaders()
             parameter("sort", if (sortDesc) "desc" else "asc")
