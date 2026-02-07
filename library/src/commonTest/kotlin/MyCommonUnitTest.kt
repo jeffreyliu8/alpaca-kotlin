@@ -3,19 +3,16 @@ package io.github.jeffreyliu8
 import alpaca.AlpacaClient
 import alpaca.AlpacaClientImpl
 import alpaca.logger.LoggerRepositoryImpl
-import alpaca.model.AlpacaResponseInterface
 import alpaca.model.AlpacaStockExchangeOption
-import alpaca.model.stream.StreamingRequestResponse
+import app.cash.turbine.test
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.logging.LogLevel
 import io.ktor.client.plugins.logging.Logging
 import io.ktor.client.plugins.websocket.WebSockets
 import io.ktor.serialization.kotlinx.json.json
+import io.ktor.utils.io.ioDispatcher
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.last
-import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.json.Json
 import kotlin.test.Test
@@ -87,7 +84,7 @@ class MyCommonUnitTest {
 //
 //        }
 
-        val pair: Pair<StreamingRequestResponse, List<AlpacaResponseInterface>> = combine(
+        combine(
             client.streamAccount(),
             client.monitorStockPrice(
                 setOf("FAKEPACA"),
@@ -96,8 +93,10 @@ class MyCommonUnitTest {
         ) { a, b ->
             println("$a, $b")
             Pair(a, b)
-        }.first()
-        assertNotNull(pair.first.toString())
+        }.test {
+            assertNotNull(awaitItem())
+            cancelAndIgnoreRemainingEvents()
+        }
     }
 
     @Test
@@ -106,13 +105,16 @@ class MyCommonUnitTest {
             isPaper = true,
             apiKey = apiKey,
             apiSecret = apiSecret,
+            dispatcher = ioDispatcher(),
         )
-        val response = client.monitorStockPrice(
+        client.monitorStockPrice(
             setOf("FAKEPACA"),
             stockExchange = AlpacaStockExchangeOption.TEST
-        ).take(4).last()
-        println("fakepeca response: ${response.last()}")
-        assertNotNull(response)
+        ).test {
+            assertNotNull(awaitItem())
+            println("fakepeca response: ${awaitItem()}")
+            cancelAndIgnoreRemainingEvents()
+        }
     }
 
     @Test
@@ -145,10 +147,13 @@ class MyCommonUnitTest {
             isPaper = true,
             apiKey = apiKey,
             apiSecret = apiSecret,
+            dispatcher = ioDispatcher(),
         )
-        val response = client.streamNews().take(3)
-        println("subscribeNewsTest response: ${response.first()}")
-        println("subscribeNewsTest response: ${response.last()}")
-        assertNotNull(response)
+        client.streamNews().test {
+            assertNotNull(awaitItem())
+            assertNotNull(awaitItem())
+            println("fakepeca response: ${awaitItem()}")
+            cancelAndIgnoreRemainingEvents()
+        }
     }
 }

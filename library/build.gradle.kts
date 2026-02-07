@@ -11,7 +11,7 @@ plugins {
 }
 
 group = "io.github.jeffreyliu8"
-version = "0.0.9"
+version = "0.0.10"
 
 kotlin {
     jvm("desktop")
@@ -64,6 +64,7 @@ kotlin {
             dependencies {
                 implementation(libs.kotlin.test)
                 implementation(libs.kotlinx.coroutines.test)
+                implementation(libs.turbine)
             }
         }
         androidMain {
