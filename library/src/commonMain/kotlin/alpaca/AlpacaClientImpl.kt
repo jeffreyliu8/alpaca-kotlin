@@ -30,12 +30,9 @@ import io.ktor.client.call.*
 import io.ktor.client.plugins.websocket.*
 import io.ktor.client.request.*
 import io.ktor.http.*
-import io.ktor.utils.io.ioDispatcher
 import io.ktor.websocket.*
-import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.channelFlow
 import kotlinx.serialization.json.Json
 import kotlin.collections.forEach
 import kotlin.coroutines.cancellation.CancellationException
@@ -46,8 +43,7 @@ class AlpacaClientImpl(
     private val apiKey: String,
     private val apiSecret: String,
     private val httpClient: HttpClient = defaultAlpacaHttpClient,
-    private val logger: LoggerRepository = defaultAlpacaLogger,
-    private val dispatcher: CoroutineDispatcher = ioDispatcher(),
+    private val logger: LoggerRepository = defaultAlpacaLogger
 ) : AlpacaClient {
 
     companion object {
@@ -225,7 +221,7 @@ class AlpacaClientImpl(
     override fun monitorStockPrice(
         symbols: Set<String>,
         stockExchange: AlpacaStockExchangeOption,
-    ): Flow<List<AlpacaResponseInterface>> = flow {
+    ): Flow<List<AlpacaResponseInterface>> = channelFlow {
         try {
             httpClient.webSocket(
                 method = HttpMethod.Get,
@@ -266,37 +262,37 @@ class AlpacaClientImpl(
                             apiResponse.forEach { response ->
                                 when (response) {
                                     is AlpacaErrorCodeMessageResponse -> {
-                                        emit(apiResponse)
+                                        send(apiResponse)
                                         return@forEach
                                     }
 
                                     is AlpacaSuccessMessageResponse -> {
-                                        emit(apiResponse)
+                                        send(apiResponse)
                                         return@forEach
                                     }
 
                                     is AlpacaSubscriptionRequest -> {
-                                        emit(apiResponse)
+                                        send(apiResponse)
                                         return@forEach
                                     }
 
                                     is TradeSchema -> {
-                                        emit(apiResponse)
+                                        send(apiResponse)
                                         return@forEach
                                     }
 
                                     is QuoteSchema -> {
-                                        emit(apiResponse)
+                                        send(apiResponse)
                                         return@forEach
                                     }
 
                                     is BarSchema -> {
-                                        emit(apiResponse)
+                                        send(apiResponse)
                                         return@forEach
                                     }
 
                                     is TradeUpdateSchema -> {
-                                        emit(apiResponse)
+                                        send(apiResponse)
                                         return@forEach
                                     }
 
@@ -319,9 +315,9 @@ class AlpacaClientImpl(
             }
             logger.e("Error in WebSocket connection: $e, ${e.message}")
         }
-    }.flowOn(dispatcher)
+    }
 
-    override fun streamAccount(): Flow<StreamingRequestResponse> = flow {
+    override fun streamAccount(): Flow<StreamingRequestResponse> = channelFlow {
         try {
             httpClient.webSocket(
                 method = HttpMethod.Get,
@@ -356,7 +352,7 @@ class AlpacaClientImpl(
 //                            val text = frame.readText()
 //                            val apiResponse =
 //                                Json.decodeFromString<List<AlpacaResponseInterface>>(text)
-//                            emit(apiResponse)
+//                            send(apiResponse)
 //                        }
 
                         is Frame.Binary -> {
@@ -364,7 +360,7 @@ class AlpacaClientImpl(
                             logger.d("frame: $response")
                             val apiResponse =
                                 Json.decodeFromString<StreamingRequestResponse>(response)
-                            emit(apiResponse)
+                            send(apiResponse)
                         }
 
                         else -> logger.e("Received non-text frame: $frame")
@@ -378,7 +374,7 @@ class AlpacaClientImpl(
             }
             logger.e("Error in WebSocket connection: $e, ${e.message}")
         }
-    }.flowOn(dispatcher)
+    }
 
     override suspend fun getTrades(
         symbol: String,
@@ -431,7 +427,7 @@ class AlpacaClientImpl(
         return null
     }
 
-    override fun streamNews(symbols: Set<String>): Flow<List<AlpacaResponseInterface>> = flow {
+    override fun streamNews(symbols: Set<String>): Flow<List<AlpacaResponseInterface>> = channelFlow {
         try {
             httpClient.webSocket(
                 method = HttpMethod.Get,
@@ -470,22 +466,22 @@ class AlpacaClientImpl(
                             apiResponse.forEach { response ->
                                 when (response) {
                                     is AlpacaErrorCodeMessageResponse -> {
-                                        emit(apiResponse)
+                                        send(apiResponse)
                                         return@forEach
                                     }
 
                                     is AlpacaSuccessMessageResponse -> {
-                                        emit(apiResponse)
+                                        send(apiResponse)
                                         return@forEach
                                     }
 
                                     is AlpacaSubscriptionRequest -> {
-                                        emit(apiResponse)
+                                        send(apiResponse)
                                         return@forEach
                                     }
 
                                     is NewsEvent -> {
-                                        emit(apiResponse)
+                                        send(apiResponse)
                                         return@forEach
                                     }
 
@@ -508,5 +504,5 @@ class AlpacaClientImpl(
             }
             logger.e("Error in WebSocket connection: $e, ${e.message}")
         }
-    }.flowOn(dispatcher)
+    }
 }

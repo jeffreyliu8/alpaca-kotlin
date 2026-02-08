@@ -18,7 +18,7 @@ Add the following to your `build.gradle.kts` file:
 
 ```kotlin
 dependencies {
-    implementation("io.github.jeffreyliu8:alpaca-kotlin:0.0.10")
+    implementation("io.github.jeffreyliu8:alpaca-kotlin:0.0.11")
 }
 ```
 
@@ -112,3 +112,6 @@ runBlocking {
 ## License
 
 This project is licensed under the Apache License, Version 2.0. See the [LICENSE](LICENSE) file for details.
+
+
+Use ./gradlew publishToMavenCentral to make a new release
