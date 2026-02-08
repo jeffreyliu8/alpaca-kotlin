@@ -30,9 +30,12 @@ import io.ktor.client.call.*
 import io.ktor.client.plugins.websocket.*
 import io.ktor.client.request.*
 import io.ktor.http.*
+import io.ktor.utils.io.ioDispatcher
 import io.ktor.websocket.*
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.serialization.json.Json
 import kotlin.collections.forEach
 import kotlin.coroutines.cancellation.CancellationException
@@ -44,6 +47,7 @@ class AlpacaClientImpl(
     private val apiSecret: String,
     private val httpClient: HttpClient = defaultAlpacaHttpClient,
     private val logger: LoggerRepository = defaultAlpacaLogger,
+    private val dispatcher: CoroutineDispatcher = ioDispatcher(),
 ) : AlpacaClient {
 
     companion object {
@@ -315,7 +319,7 @@ class AlpacaClientImpl(
             }
             logger.e("Error in WebSocket connection: $e, ${e.message}")
         }
-    }
+    }.flowOn(dispatcher)
 
     override fun streamAccount(): Flow<StreamingRequestResponse> = flow {
         try {
@@ -374,7 +378,7 @@ class AlpacaClientImpl(
             }
             logger.e("Error in WebSocket connection: $e, ${e.message}")
         }
-    }
+    }.flowOn(dispatcher)
 
     override suspend fun getTrades(
         symbol: String,
@@ -403,7 +407,7 @@ class AlpacaClientImpl(
         pageToken: String?
     ): AlpacaNewsResponse? {
         if (symbols.isEmpty()) throw RuntimeException("symbols cannot be empty")
-        if (limit > 50 || limit < 1) throw RuntimeException("limit must be between 1 and 50, inclusive")
+        if (limit !in 1..50) throw RuntimeException("limit must be between 1 and 50, inclusive")
         val rsp = httpClient.get("$API_DATA_URL/v1beta1/news") {
             withAlpacaHeaders()
             parameter("sort", if (sortDesc) "desc" else "asc")
@@ -504,5 +508,5 @@ class AlpacaClientImpl(
             }
             logger.e("Error in WebSocket connection: $e, ${e.message}")
         }
-    }
+    }.flowOn(dispatcher)
 }
