@@ -11,7 +11,6 @@ import io.ktor.client.plugins.logging.LogLevel
 import io.ktor.client.plugins.logging.Logging
 import io.ktor.client.plugins.websocket.WebSockets
 import io.ktor.serialization.kotlinx.json.json
-import io.ktor.utils.io.ioDispatcher
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.json.Json
@@ -104,8 +103,7 @@ class MyCommonUnitTest {
         val client: AlpacaClient = AlpacaClientImpl(
             isPaper = true,
             apiKey = apiKey,
-            apiSecret = apiSecret,
-            dispatcher = ioDispatcher(),
+            apiSecret = apiSecret
         )
         client.monitorStockPrice(
             setOf("FAKEPACA"),
@@ -146,8 +144,7 @@ class MyCommonUnitTest {
         val client: AlpacaClient = AlpacaClientImpl(
             isPaper = true,
             apiKey = apiKey,
-            apiSecret = apiSecret,
-            dispatcher = ioDispatcher(),
+            apiSecret = apiSecret
         )
         client.streamNews().test {
             assertNotNull(awaitItem())
